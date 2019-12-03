@@ -2,11 +2,7 @@ package edu.upenn.cit594;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
 
-import edu.upenn.cit594.data.Parking;
-import edu.upenn.cit594.data.Property;
 import edu.upenn.cit594.datamanagement.ParkingReader;
 import edu.upenn.cit594.datamanagement.CSVParkingReader;
 import edu.upenn.cit594.datamanagement.JSONParkingReader;
@@ -15,6 +11,7 @@ import edu.upenn.cit594.datamanagement.PropertyReader;
 import edu.upenn.cit594.processor.ParkingProcessor;
 import edu.upenn.cit594.processor.PopulationProcessor;
 import edu.upenn.cit594.processor.PropertyProcessor;
+import edu.upenn.cit594.ui.UserInterface;
 
 /**
  * The Main class starts the application.
@@ -53,17 +50,10 @@ public class Main {
 			System.out.println("The specified input file does not exist or can not opened for reading.");
 			System.exit(1);
 		}
-		
-		System.out.println("The command line arguments are: ");
-		for (String val:args) {
-			System.out.println(val);
-        }
-		
+				
 		// Read the population input
 		PopulationReader popReader = new PopulationReader(populationName);
-		Map<String, Double> population = popReader.getDemogaphicInfo();		
-		System.out.println("population.size() = " + population.size());		
-		
+			
 		// Read the parking input
 		ParkingReader parReader;		
 		if (parkingFormat.toLowerCase().equals("json")) {
@@ -71,46 +61,23 @@ public class Main {
 		} else {
 			parReader = new CSVParkingReader(parkingName);
 		}	
-		List<Parking> parking = parReader.getParkingInfo();				
-		System.out.println("parking.size() = " + parking.size());
-		
+					
 		// Read the property input
 		PropertyReader proReader = new PropertyReader(propertyName);
-		List<Property> property = proReader.getPropertyInfo();	
-		System.out.println("property.size() = " + property.size());
 
 		// Process the population information
 		PopulationProcessor popProcessor = new PopulationProcessor(popReader);
-		popProcessor.caculateTotalPopulation();
 		
 		// Process the parking information
 		ParkingProcessor parProcessor = new ParkingProcessor(parReader);
-		Map<String, Double> finePerCapita = parProcessor.calculateFinePerCapita(population);
-		System.out.println("finePerCapita.size() = " + finePerCapita.size());		
-		for (Map.Entry<String, Double> m : finePerCapita.entrySet()) {
-			System.out.println(m.getKey() + ": " + m.getValue());
-		}
 		
 		// Process the property information
 		PropertyProcessor proProcessor = new PropertyProcessor(proReader);
-		Map<String, Double> valuePerCapita = proProcessor.calculateValuePerCapita(population);
-		System.out.println("valuePerCapita.size() = " + valuePerCapita.size());		
-		for (Map.Entry<String, Double> m : valuePerCapita.entrySet()) {
-			System.out.println(m.getKey() + ": " + m.getValue());
-		}
 		
-		Map<String, Double> averageValue = proProcessor.calcuateAverageValue();	
-		System.out.println("averageValue.size() = " + averageValue.size());	
-		for (Map.Entry<String, Double> m : averageValue.entrySet()) {
-			System.out.println(m.getKey() + ": " + m.getValue());
-		}
+		// Prompt users to specify the action to be performed
+		UserInterface ui = new UserInterface(parProcessor, proProcessor, popProcessor);
+		ui.select();
 		
-		Map<String, Double> averageArea = proProcessor.calcuateAverageArea();	
-		System.out.println("averageArea.size() = " + averageArea.size());	
-		for (Map.Entry<String, Double> m : averageArea.entrySet()) {
-			System.out.println(m.getKey() + ": " + m.getValue());
-		}
-				
 	}
 
 }
