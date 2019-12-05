@@ -8,9 +8,10 @@ import java.util.Scanner;
 import edu.upenn.cit594.processor.ParkingProcessor;
 import edu.upenn.cit594.processor.PopulationProcessor;
 import edu.upenn.cit594.processor.PropertyProcessor;
+import edu.upenn.cit594.logging.Logger;
 
 /**
- * The UserInterface class
+ * The UserInterface class interacts with users and displays results
  * This class is part of the "User Interface" tier.
  */
 public class UserInterface {
@@ -19,15 +20,17 @@ public class UserInterface {
 	protected ParkingProcessor parProcessor;
 	protected PropertyProcessor proProcessor;
 	protected PopulationProcessor popProcessor;
+	protected Logger log;
 	protected Scanner in;
 	protected DecimalFormat df1;
 	protected DecimalFormat df2;
-	
+		
 	// The UserInterface constructor
-	public UserInterface(ParkingProcessor parProcessor, PropertyProcessor proProcessor, PopulationProcessor popProcessor) {
+	public UserInterface(ParkingProcessor parProcessor, PropertyProcessor proProcessor, PopulationProcessor popProcessor, Logger log) {
 		this.parProcessor = parProcessor;
 		this.proProcessor = proProcessor;
 		this.popProcessor = popProcessor;
+		this.log = log;
 		in = new Scanner(System.in);
 		df1 = new DecimalFormat("0.0000");
 		df1.setRoundingMode(RoundingMode.DOWN);
@@ -35,7 +38,7 @@ public class UserInterface {
 		df2.setRoundingMode(RoundingMode.DOWN);
 	}
 	
-	// The select method
+	// The select method prompts the user to make choices
 	public void select() {
 		
 		System.out.println("===========================================================================");
@@ -45,19 +48,20 @@ public class UserInterface {
 	    System.out.println("|    0 - Exit                                                             |");
 	    System.out.println("|    1 - Display total population for all ZIP codes                       |");
 	    System.out.println("|    2 - Display total fines per capita for each ZIP codes                |");
-	    System.out.println("|    3 - Display average market value for a specified ZIP codes           |");
-	    System.out.println("|    4 - Display average livable area for a specified ZIP codes           |");
-	    System.out.println("|    5 - Display total market value per capita for a specified ZIP codes  |");
+	    System.out.println("|    3 - Display average market value for a specified ZIP code            |");
+	    System.out.println("|    4 - Display average livable area for a specified ZIP code            |");
+	    System.out.println("|    5 - Display total market value per capita for a specified ZIP code   |");
 	    System.out.println("|    6 -                                                                  |");
 	    System.out.println("===========================================================================");
 	    
 	    boolean quit = false;
-	    int choice;
 	    do {
-	    	System.out.println("Select option: ");  
-	    	choice = -1;
-	    	if (in.hasNextInt()) {
-	    		choice = in.nextInt();    		
+	    	System.out.println("Select option: "); 
+	    	String input = in.nextLine();
+	    	log.printChoice(input);	    	
+	    	int choice = -1;
+	    	if (input.matches("[0-6]{1}")) {	    		
+	    		choice = Integer.parseInt(input);	    		
 	    	} else {
 	    		System.out.println("Abort! Invalid selection. Please select an integer between 0-6.");
 	    		System.exit(1);
@@ -100,7 +104,7 @@ public class UserInterface {
 	    
 	}
 		
-	// The displayTotalPopulation method
+	// The displayTotalPopulation method displays the total population for all ZIP codes
 	public void displayTotalPopulation() {
 		
 		int totalPopulation = popProcessor.caculateTotalPopulation();				
@@ -108,7 +112,7 @@ public class UserInterface {
 		
 	}
 	
-	// The displayFinePerCapita method
+	// The displayFinePerCapita method displays the total fines per capita for each ZIP code
 	public void displayFinePerCapita() {
 		
 		Map<String, Double> finePerCapita = parProcessor.calculateFinePerCapita(popProcessor.getPopulation());	
@@ -120,11 +124,12 @@ public class UserInterface {
 			
 	}
 	
-	// The displayAverageValue method
+	// The displayAverageValue method displays the average market value for a specified ZIP codes
 	public void displayAverageValue() {
 		
 		System.out.println("Enter the ZIP code: ");
-		String input = in.next();
+		String input = in.nextLine();
+		log.printZIP(input);
 		double output = 0.0;
 		Map<String, Double> averageValue = proProcessor.calcuateAverageValue();	
 		System.out.println("The below is the average residential market value for " +  input + ": ");
@@ -137,11 +142,12 @@ public class UserInterface {
 		
 	}
 	
-	// The displayAverageArea method
+	// The displayAverageArea method displays the average livable area for a specified ZIP code
 	public void displayAverageArea() {
 		
 		System.out.println("Enter the ZIP code: ");
-		String input = in.next();
+		String input = in.nextLine();
+		log.printZIP(input);
 		double output = 0.0;
 		Map<String, Double> averageArea = proProcessor.calcuateAverageArea();	
 		System.out.println("The below is the average residential livable area for " +  input + ": ");
@@ -154,11 +160,12 @@ public class UserInterface {
 		
 	}
 	
-	// The displayValuePerCapita method
+	// The displayValuePerCapita method displays the total market value per capita for a specified ZIP code
 	public void displayValuePerCapita() {
 		
 		System.out.println("Enter the ZIP code: ");
-		String input = in.next();
+		String input = in.nextLine();
+		log.printZIP(input);
 		double output = 0.0;
 		Map<String, Double> valuePerCapita = proProcessor.calculateValuePerCapita(popProcessor.getPopulation());	
 		System.out.println("The below is the total residential market value per capita for " +  input + ": ");
