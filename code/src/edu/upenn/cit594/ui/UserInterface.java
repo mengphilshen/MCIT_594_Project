@@ -4,6 +4,8 @@ import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.Set;
+import java.util.TreeSet;
 
 import edu.upenn.cit594.processor.ParkingProcessor;
 import edu.upenn.cit594.processor.PopulationProcessor;
@@ -41,18 +43,18 @@ public class UserInterface {
 	// The select method prompts the user to make choices
 	public void select() {
 		
-		System.out.println("===========================================================================");
-	    System.out.println("|                             MENU SELECTION                              |");
-	    System.out.println("===========================================================================");
-	    System.out.println("| Options:                                                                |");
-	    System.out.println("|    0 - Exit                                                             |");
-	    System.out.println("|    1 - Display total population for all ZIP codes                       |");
-	    System.out.println("|    2 - Display total fines per capita for each ZIP codes                |");
-	    System.out.println("|    3 - Display average market value for a specified ZIP code            |");
-	    System.out.println("|    4 - Display average livable area for a specified ZIP code            |");
-	    System.out.println("|    5 - Display total market value per capita for a specified ZIP code   |");
-	    System.out.println("|    6 -                                                                  |");
-	    System.out.println("===========================================================================");
+		System.out.println("===============================================================================================================");
+	    System.out.println("|                             MENU SELECTION                                                                  |");
+	    System.out.println("===============================================================================================================");
+	    System.out.println("| Options:                                                                                                    |");
+	    System.out.println("|    0 - Exit                                                                                                 |");
+	    System.out.println("|    1 - Display total population for all ZIP codes                                                           |");
+	    System.out.println("|    2 - Display total fines per capita for each ZIP codes                                                    |");
+	    System.out.println("|    3 - Display average market value for a specified ZIP code                                                |");
+	    System.out.println("|    4 - Display average livable area for a specified ZIP code                                                |");
+	    System.out.println("|    5 - Display total market value per capita for a specified ZIP code                                       |");
+	    System.out.println("|    6 - Display the correlation coefficient between total fines per capita and total market value per capita |");
+	    System.out.println("===============================================================================================================");
 	    
 	    boolean quit = false;
 	    do {
@@ -89,6 +91,7 @@ public class UserInterface {
 	    		break;
 	    	case 6:
 	    		System.out.println("You've selected Option 6.");
+	    		displayCorrlation();
 	    		break;
 	    	case 0:
 	    		System.out.println("You've selected Option 0.");
@@ -175,6 +178,34 @@ public class UserInterface {
 			}
 		}
 		System.out.println(df2.format(output));
+		
+	}
+	
+	// The displayCorrelation method displays the correlation coefficient between total fines per capita and total market value per capita
+	public void displayCorrlation() {
+		
+		Map<String, Double> finePerCapita = parProcessor.calculateFinePerCapita(popProcessor.getPopulation());
+		Map<String, Double> valuePerCapita = proProcessor.calculateValuePerCapita(popProcessor.getPopulation());	
+		Set<String> commonZIP = new TreeSet<String>(finePerCapita.keySet()); 
+		commonZIP.retainAll(valuePerCapita.keySet());
+		double n = commonZIP.size();
+		double xSum = 0.0;
+		double ySum = 0.0;
+		double xySum = 0.0;
+		double x2Sum = 0.0;
+		double y2Sum = 0.0;
+		double correlation = 0.0;
+		for (String zip : commonZIP) {		
+			double x = finePerCapita.get(zip);
+			double y = valuePerCapita.get(zip);
+			xSum += x;
+			ySum += y;
+			xySum += x*y;
+			x2Sum += x*x;
+			y2Sum += y*y;
+		}
+		correlation = (n*xySum-xSum*ySum) / Math.sqrt((n*x2Sum-xSum*xSum)*(n*y2Sum-ySum*ySum));	
+		System.out.println("The Pearson’s correlation coefficient between total fines per capita and total market value per capita is " + df1.format(correlation));
 		
 	}
 			
